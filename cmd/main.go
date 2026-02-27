@@ -26,7 +26,7 @@ func main() {
 	cfg := config{
 		addr: ":8888",
 		db: dbConfig{
-			dsn: env.GetString("GOOSE_DBSTRING", "host=172.19.0.2 user=postgres password=postgres dbname=ecom sslmode=disable"),
+			dsn: env.GetString("GOOSE_DBSTRING", "host=127.0.0.1 user=postgres password=postgres dbname=ecom sslmode=disable"),
 		},
 	}
 
