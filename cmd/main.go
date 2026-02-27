@@ -3,27 +3,32 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 
 	"github.com/jack/ecom/internal/env"
 	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Logger
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: could not load .env file: %v", err)
+	}
 
 	ctx := context.Background()
 
 	cfg := config{
 		addr: ":8888",
 		db: dbConfig{
-			dsn: env.GetString("GOOSE_DBSTRING", "host=localhost user=postgres password=postgres dbname=ecom sslmode=disable"),
+			dsn: env.GetString("GOOSE_DBSTRING", "host=172.19.0.2 user=postgres password=postgres dbname=ecom sslmode=disable"),
 		},
 	}
-
-	// Logger
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	slog.SetDefault(logger)
 
 	// DataBase
 	conn, err := pgx.Connect(ctx, cfg.db.dsn)
