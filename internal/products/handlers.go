@@ -47,3 +47,39 @@ func (h *handler) FindProductById(w http.ResponseWriter, r *http.Request) {
 		json.Write(w, http.StatusOK, product)
 	}
 }
+
+type CreateProductRequest struct {
+	Name          string `json:"name"`
+	PriceInCenter int32  `json:"price_in_center"`
+	Quantity      int32  `json:"quantity"`
+}
+
+func (h *handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	// 1. 解析请求体
+	var req CreateProductRequest
+	if err := json.Read(r, &req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// 2. 验证必填字段
+	if req.Name == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
+		return
+	}
+	if req.PriceInCenter < 0 {
+		http.Error(w, "price_in_center must be >= 0", http.StatusBadRequest)
+		return
+	}
+
+	// 3. 调用 service
+	product, err := h.service.CreateProduct(r.Context(), req.Name, req.PriceInCenter, req.Quantity)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// 4. 返回响应
+	json.Write(w, http.StatusCreated, product)
+}
