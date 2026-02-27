@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jack/ecom/internal/json"
+	"github.com/jackc/pgx/v5"
 )
 
 type handler struct {
@@ -39,13 +40,20 @@ func (h *handler) FindProductById(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
-	if product, err := h.service.FindProductById(r.Context(), id); err != nil {
+	product, err := h.service.FindProductById(r.Context(), id)
+	if err != nil {
+		// 检查是否是"记录不存在"的错误
+		if err == pgx.ErrNoRows {
+			http.Error(w, "Product not found", http.StatusNotFound)
+			return
+		}
+		// 其他错误返回 500
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
-	} else {
-		json.Write(w, http.StatusOK, product)
 	}
+
+	json.Write(w, http.StatusOK, product)
 }
 
 type CreateProductRequest struct {

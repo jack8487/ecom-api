@@ -2,7 +2,6 @@ package products
 
 import (
 	"context"
-	"log"
 
 	repo "github.com/jack/ecom/internal/adapters/postgresql/sqlc"
 )
@@ -26,20 +25,20 @@ func NewService(repo repo.Querier) Service {
 
 func (s *svc) ListProducts(ctx context.Context) ([]repo.Product, error) {
 	if products, err := s.repo.ListProducts(ctx); err != nil {
-		log.Fatalf("err:", err)
+		// log.Fatalf("err: %v", err)
+		return nil, err
 	} else {
 		return products, nil
 	}
-	return nil, nil
 }
 
 func (s *svc) FindProductById(ctx context.Context, id int64) (repo.Product, error) {
 	if product, err := s.repo.FindProductByID(ctx, id); err != nil {
-		log.Fatalf("err:", err)
+		// log.Fatalf("err: %v", err)
+		return repo.Product{}, err
 	} else {
 		return product, nil
 	}
-	return repo.Product{}, nil
 }
 
 func (s *svc) CreateProduct(ctx context.Context, name string, priceInCenter int32, quantity int32) (repo.Product, error) {
@@ -48,9 +47,9 @@ func (s *svc) CreateProduct(ctx context.Context, name string, priceInCenter int3
 		PriceInCenter: priceInCenter,
 		Quantity:      quantity,
 	}); err != nil {
-		log.Fatalf("err: %v", err)
+		// log.Fatalf("err: %v", err)
+		return repo.Product{}, err
 	} else {
 		return product, nil
 	}
-	return repo.Product{}, nil
 }
