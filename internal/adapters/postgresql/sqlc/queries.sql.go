@@ -9,6 +9,34 @@ import (
 	"context"
 )
 
+const createProduct = `-- name: CreateProduct :one
+INSERT INTO products (
+  name, price_in_center, quantity
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, name, price_in_center, quantity, created_at
+`
+
+type CreateProductParams struct {
+	Name          string `json:"name"`
+	PriceInCenter int32  `json:"price_in_center"`
+	Quantity      int32  `json:"quantity"`
+}
+
+func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
+	row := q.db.QueryRow(ctx, createProduct, arg.Name, arg.PriceInCenter, arg.Quantity)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.PriceInCenter,
+		&i.Quantity,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const findProductByID = `-- name: FindProductByID :one
 SELECT 
   id, name, price_in_center, quantity, created_at 
